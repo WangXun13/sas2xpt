@@ -1,0 +1,32 @@
+################################################################################
+#                          Property of Sanofi                         
+# Program Name             : def_3_sdtm_sas2xpt.R                 
+# Program Purpose          : Creation of XPT files for a list of datasets  
+#                                                                      
+# Compound/Study/Analysis  : xxx/xxxx/xxxx                         
+# Program Author           : Xun Wang (U1007283/CN/EXT)                                      
+# Program creation date    : 21May2025                                     
+#                                                                     
+# System                   : R - eWise environment  
+#
+# Revision History                                                   
+# ---------------------------------------------------------------------                                                                   
+# Revision #1                                                        
+# Date                        :                                      
+# Author                      :                                      
+# Description of modification :                                      
+################################################################################
+
+# load libraries and functions -------------------------------------------------
+library(dplyr)
+library(haven)
+library(tibble)
+
+source(paste0(W_WISE,"/MISC/R_WX/R_tools_dev/Script_test/sas2xpt_test.R"))
+
+# generate xpr files -----------------------------------------------------------
+sas2xpt(input_dir=paste0(W_WISE,"/MISC/R_WX/R_tools_dev/Input/1_sas2xpt/sdtm"),
+        output_dir=paste0(W_WISE,"/MISC/R_WX/R_tools_dev/Output/1_sas2xpt")
+        )
+
+
