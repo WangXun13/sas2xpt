@@ -15,7 +15,7 @@
 #  Revised by              :                                                              
 #  Revision Description    :                                                              
 #########################[ STOP STUDY HEADER  ]#################################
- 
+
 #########################[       NOTICE       ]#########################
 #  Please note that length for SAS dataset name to be exported to XPT files  
 #  must be less than or equal to 8.
@@ -26,25 +26,25 @@ sas2xpt <- function(input_dir = NULL,
                     include = NULL,
                     exclude = NULL) {
   
-# Get sas datasets per function parameters--------------------------------------
+  # Get sas datasets per function parameters--------------------------------------
   
-## all sas datasets in input direction
+  ## all sas datasets in input direction
   all_sasds_file <- list.files(
     path = input_dir,
     pattern = "*.sas7bdat$",
     full.names = FALSE,
     ignore.case = TRUE)
   
-## if there are not any sas datasets in the input direction.
+  ## if there are not any sas datasets in the input direction.
   if (length(all_sasds_file) == 0) {
     message("No sas datasets in the direction: ", input_dir)
     return(invisible(NULL))
   }  
   
-## get sas datasets name  
+  ## get sas datasets name  
   all_sasds_name <- tools::file_path_sans_ext(all_sasds_file)
   
-## if include or exclude parameters are not empty.  
+  ## if include or exclude parameters are not empty.  
   if (!is.null(include)) {
     selected_sasds_file <- all_sasds_file[all_sasds_name %in% include]
   } else {
@@ -55,13 +55,13 @@ sas2xpt <- function(input_dir = NULL,
     selected_sasds_file <- selected_sasds_file[!all_sasds_name %in% exclude]
   }
   
-## if there are not any sas datasets after filtering.
+  ## if there are not any sas datasets after filtering.
   if (length(selected_sasds_file) == 0) {
     message("No sas datasets after filtering")
     return(invisible(NULL))
   }
   
-# Generate a dataframe for conversion log --------------------------------------
+  # Generate a dataframe for conversion log --------------------------------------
   
   conversion_log <- dplyr::tibble(
     sas = character(),
@@ -75,13 +75,13 @@ sas2xpt <- function(input_dir = NULL,
   
   for (sasds_file in selected_sasds_file) {
     start_time <- Sys.time()
-    sdsds_name <- tools::file_path_sans_ext(sasds)
-    sasds_path <- file.path(input_dir, sasds)
-    xpt_file <- paste0(sdsds_name, ".xpt")
-    xpt_path <- file.path(output_dir, xpt_name)
+    sasds_name <- tools::file_path_sans_ext(sasds_file)
+    sasds_path <- file.path(input_dir, sasds_file)
+    xpt_file <- paste0(sasds_name, ".xpt")
+    xpt_path <- file.path(output_dir, xpt_file)
     
     tryCatch({
- 
+      
       sasds <- haven::read_sas(sasds_path)
       
       haven::write_xpt(sasds, xpt_path, version = 5)
@@ -90,33 +90,33 @@ sas2xpt <- function(input_dir = NULL,
       
       conversion_log <- dplyr::add_row(
         conversion_log,
-        sas = sdsds_name,
+        sas = sasds_name,
         xpt = xpt_path,
-        rows = nrow(sas_data),
-        cols = ncol(sas_data),
+        rows = nrow(sasds),
+        cols = ncol(sasds),
         file_size_mb = round(file_size, 2),
         conversion_time = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
         status = "Success"
-        )
+      )
       
       message(sprintf("Conversion Success: %s (%.2f MB) -> %s",
                       sasds_file, file_size, xpt_file))
       
-      }, error = function(e) {
-        
+    }, error = function(e) {
+      
       conversion_log <- dplyr::add_row(
         conversion_log,
-        sas = sdsds_name,
+        sas = sasds_name,
         xpt = xpt_path,
         rows = NA,
         cols = NA,
         file_size_mb = NA,
         conversion_time = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
         status = paste("Error:", conditionMessage(e))
-        )
+      )
       
-      message("Conversion Fail: ", sdsds_file, " - ", conditionMessage(e))
-      })
+      message("Conversion Fail: ", sasds_file, " - ", conditionMessage(e))
+    })
   }
   
   message("\nConversion summary:")
@@ -127,4 +127,3 @@ sas2xpt <- function(input_dir = NULL,
   return(conversion_log)
   
 } 
-  
